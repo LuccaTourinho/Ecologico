@@ -1,0 +1,10 @@
+<?php
+return [
+    'host'  =>  "localhost",
+    'port'  =>  "5432", 
+    'name'  =>  "Ecologico",
+    'user'  =>  "postgres",
+    'pass'  =>  "041199",
+    'type'  =>  "pgsql",
+    'prep'  =>  "1"
+];
