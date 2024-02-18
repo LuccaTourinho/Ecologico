@@ -7,6 +7,30 @@
         <action>PessoaHeaderList</action>
         <icon>fas:address-card fa-fw</icon>
       </menuitem>
+      <menuitem label="Residuo">
+        <action>ResiduoHeaderList</action>
+        <icon>fas:birthday-cake fa-fw</icon>
+      </menuitem>
+      <menuitem label="Produto">
+        <action>ProdutoHeaderList</action>
+        <icon>fas:cart-plus fa-fw</icon>
+      </menuitem>
+      <menuitem label="Material Residual">
+        <action>MaterialResidualHeaderList</action>
+        <icon>fas:meteor fa-fw</icon>
+      </menuitem>
+      <menuitem label="Recebimento Material">
+        <action>RecebimentoMaterialHeaderList</action>
+        <icon>fas:cart-plus fa-fw</icon>
+      </menuitem>
+      <menuitem label="Entrada">
+        <action>EntradaHeaderList</action>
+        <icon>fas:door-open fa-fw</icon>
+      </menuitem>
+      <menuitem label="Saida">
+        <action>SaidaHeaderList</action>
+        <icon>fas:door-closed fa-fw</icon>
+      </menuitem>
     </menu>
   </menuitem>
   <menuitem label="_t{Administration}">
@@ -101,11 +125,11 @@
     <menu>
       <menuitem label="_t{Page management}">
         <action>SystemWikiList</action>
-        <icon>fab fa:wikipedia-w fa-fw</icon>
+        <icon>fab fa fa-fw fa-fw</icon>
       </menuitem>
       <menuitem label="_t{Search pages}">
         <action>SystemWikiSearchList</action>
-        <icon>fa fa:search fa-fw</icon>
+        <icon>fa fa fa-fw fa-fw</icon>
       </menuitem>
     </menu>
   </menuitem>
