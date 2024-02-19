@@ -27,13 +27,9 @@ class RecebimentoMaterialForm extends TStandardForm
         $vl_real           = new TNumeric('vl_real', 2, ',', '.', true);
         $vl_eco            = new TNumeric('vl_eco', 2, ',', '.', true);
         
-        // Define os tamanhos dos campos
-        $id->setSize('10%');
-        $pessoa_id->setSize('70%');
-        $material_id->setSize('70%');
-        $qt_material->setSize('70%');
-        $vl_real->setSize('70%');
-        $vl_eco->setSize('70%');
+        $id->setEditable(false);
+
+
         
         // Adiciona os campos ao formulário
         $this->form->addFields([new TLabel('ID')], [$id]);
@@ -42,17 +38,59 @@ class RecebimentoMaterialForm extends TStandardForm
         $this->form->addFields([new TLabel('Quantidade do Material')], [$qt_material]);
         $this->form->addFields([new TLabel('Valor Real')], [$vl_real]);
         $this->form->addFields([new TLabel('Valor Ecológico')], [$vl_eco]);
+
+        // Define os tamanhos dos campos
+        $id->setSize('10%');
+        $pessoa_id->setSize('20%');
+        $material_id->setSize('20%');
+        $qt_material->setSize('20%');
+        $vl_real->setSize('15%');
+        $vl_eco->setSize('15%');
+
+        $qt_material->addValidation('Quantidade', new TRequiredValidator);
         
         // Adiciona ações ao formulário
-        $this->form->addAction(_t('Save'), new TAction([$this, 'onSave']), 'far:save');
+        $btn = $this->form->addAction(_t('Save'), new TAction([$this, 'onSave']), 'far:save');
+        $btn->class = 'btn btn-sm btn-primary';
+
         $this->form->addActionLink(_t('Clear'), new TAction([$this, 'onEdit']), 'fa:eraser red');
-        $this->form->addActionLink(_t('Close'), new TAction([$this, 'onClose']), 'fa:times red');
+        $this->form->addHeaderActionLink(_t('Close'), new TAction([$this, 'onClose']), 'fa:times red');
         
         // Adiciona o formulário à página
         $container = new TVBox;
         $container->style = 'width: 100%';
         $container->add($this->form);
         parent::add($container);
+    }
+
+    public function onEdit($param)
+    {
+        try
+        {
+            if (isset($param['key']))
+            {
+                $key = $param['key'];
+                
+                TTransaction::open($this->database);
+                $class = $this->activeRecord;
+                $object = new $class($key);
+                
+                $this->form->setData($object);
+                
+                TTransaction::close();
+                
+                return $object;
+            }
+            else
+            {
+                $this->form->clear(true);
+            }
+        }
+        catch (Exception $e)
+        {
+            new TMessage('error', $e->getMessage());
+            TTransaction::rollback();
+        }
     }
     
     public function onSave()
@@ -69,11 +107,16 @@ class RecebimentoMaterialForm extends TStandardForm
             $data->id = $object->id;
             
             TTransaction::close();
-            $pos_action = new TAction(['RecebimentoMaterialList', 'onReload']);
+            $pos_action = new TAction(['RecebimentoMaterialHeaderList', 'onReload']);
             new TMessage('info', AdiantiCoreTranslator::translate('Record saved'), $pos_action);
+
+            return $object;
         }
         catch (Exception $e)
         {
+            // get the form data
+            $object = $this->form->getData($this->activeRecord);
+            $this->form->setData($object);
             new TMessage('error', $e->getMessage());
             TTransaction::rollback();
         }

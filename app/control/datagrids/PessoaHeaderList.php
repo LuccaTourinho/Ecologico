@@ -27,8 +27,6 @@
             $this->form->setFormTitle('Pessoas');
             
             $name = new TEntry('nm_pessoa');
-          
-    
             $this->form->addFields( [new TLabel(_t('Name'))], [$name] );
             $name->setSize('100%');
             

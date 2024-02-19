@@ -3,6 +3,7 @@
 class EntradaForm extends TPage
 {
     private $form;
+    
 
     public function __construct()
     {

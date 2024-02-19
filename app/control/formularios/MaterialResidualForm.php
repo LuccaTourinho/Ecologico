@@ -60,7 +60,9 @@ class MaterialResidualForm extends TStandardForm
         $this->form->addActionLink(_t('Clear'), new TAction([$this, 'onEdit']), 'fa:eraser red');
         $this->form->addHeaderActionLink(_t('Close'), new TAction([$this, 'onClose']), 'fa:times red');
         
-        // Adiciona o formulário à página
+        $container = new TVBox;
+        $container->style = 'width: 100%';
+        $container->add($this->form);
         parent::add($this->form);
     }
     

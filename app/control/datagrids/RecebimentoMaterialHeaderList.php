@@ -27,21 +27,18 @@ class RecebimentoMaterialHeaderList extends TStandardList
         $this->form->setFormTitle('Lista de Recebimento de Material');
         
         // Adiciona os campos de pesquisa ao formulário
-        $id_recebimentomaterial = new TEntry('id_recebimentomaterial');
-        $this->form->addFields([new TLabel('ID')], [$id_recebimentomaterial]);
-        
-        // Define os tamanhos dos campos
-        $id_recebimentomaterial->setSize('70%');
+        $name = new TEntry('id_recebimentomaterial');
+        $this->form->addFields([new TLabel(_t('Name'))], [$name]);
+        $name->setSize('100%');
         
         // Preenche o formulário com os dados da sessão
         $this->form->setData(TSession::getValue('RecebimentoMaterialHeaderList_filter_data'));
         
         // Adiciona ação de pesquisa ao formulário
-        $this->form->addAction('Pesquisar', new TAction([$this, 'onSearch']), 'fa:search');
-        
+        $btn = $this->form->addAction('Pesquisar', new TAction([$this, 'onSearch']), 'fa:search');
+        $btn->class = 'btn btn-sm btn-primary';
         // Cria a listagem
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
-        $this->datagrid->enablePopover('Detalhes', '<b>ID:</b> {id_recebimentomaterial} <br> <b>Pessoa:</b> {pessoa->nm_pessoa} <br> <b>Material Residual:</b> {material->nm_materialresidual} <br> <b>Quantidade do Material:</b> {qt_material} <br> <b>Valor Real:</b> {vl_real} <br> <b>Valor Ecológico:</b> {vl_eco}');
         $this->datagrid->style = 'width: 100%';
         $this->datagrid->setHeight(320);
         
@@ -60,6 +57,32 @@ class RecebimentoMaterialHeaderList extends TStandardList
         $this->datagrid->addColumn($column_qt_material);
         $this->datagrid->addColumn($column_vl_real);
         $this->datagrid->addColumn($column_vl_eco);
+
+        // Cria as ações de coluna do datagrid
+        $order_id = new TAction(array($this, 'onReload'));
+        $order_id->setParameter('order', 'id_recebimentomaterial');
+        $column_id->setAction($order_id);
+        
+        /*$order_name = new TAction(array($this, 'onReload'));
+        $order_name->setParameter('order', 'id_recebimentomaterial');
+        $column_name->setAction($order_name);*/
+        
+        
+        // Cria ação de EDIÇÃO
+        $action_edit = new TDataGridAction(array('RecebimentoMaterialForm', 'onEdit'), ['register_state' => 'false']);
+        $action_edit->setButtonClass('btn btn-default');
+        $action_edit->setLabel(_t('Edit'));
+        $action_edit->setImage('far:edit blue ');
+        $action_edit->setField('id_recebimentomaterial');
+        $this->datagrid->addAction($action_edit);
+        
+        // Cria ação de EXCLUSÃO
+        $action_del = new TDataGridAction(array($this, 'onDelete'));
+        $action_del->setButtonClass('btn btn-default');
+        $action_del->setLabel(_t('Delete'));
+        $action_del->setImage('far:trash-alt red ');
+        $action_del->setField('id_recebimentomaterial');
+        $this->datagrid->addAction($action_del);
         
         // Cria o modelo da listagem
         $this->datagrid->createModel();
@@ -74,9 +97,50 @@ class RecebimentoMaterialHeaderList extends TStandardList
         $panel = new TPanelGroup;
         $panel->add($this->datagrid)->style = 'overflow-x:auto';
         $panel->addFooter($this->pageNavigation);
+
+        // Criação do formulário de pesquisa
+        $btnf = TButton::create('find', [$this, 'onSearch'], '', 'fa:search');
+        $btnf->style= 'height: 37px; margin-right:4px;';
+
+        $form_search = new TForm('form_search_name');
+        $form_search->style = 'float:left;display:flex';
+        $form_search->add($name, true);
+        $form_search->add($btnf, true);
         
         // Adiciona o formulário de pesquisa ao painel como cabeçalho
-        $panel->addHeaderWidget($this->form);
+        $panel->addHeaderWidget($form_search);
+
+        // Adiciona link de ação de adição
+        $panel->addHeaderActionLink('', new TAction(['RecebimentoMaterialForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus');
+        $this->filter_label = $panel->addHeaderActionLink('Filtros', new TAction([$this, 'onShowCurtainFilters']), 'fa:filter');
+        
+        // Ações do cabeçalho
+        $dropdown = new TDropDown(_t('Export'), 'fa:list');
+        $dropdown->style = 'height:37px';
+        $dropdown->setPullSide('right');
+        $dropdown->setButtonClass('btn btn-default waves-effect dropdown-toggle');
+        $dropdown->addAction( _t('Save as CSV'), new TAction([$this, 'onExportCSV'], ['register_state' => 'false', 'static'=>'1']), 'fa:table fa-fw blue' );
+        $dropdown->addAction( _t('Save as PDF'), new TAction([$this, 'onExportPDF'], ['register_state' => 'false', 'static'=>'1']), 'far:file-pdf fa-fw red' );
+        $dropdown->addAction( _t('Save as XML'), new TAction([$this, 'onExportXML'], ['register_state' => 'false', 'static'=>'1']), 'fa:code fa-fw green' );
+        $panel->addHeaderWidget( $dropdown );
+        
+        // Ações do cabeçalho
+        $dropdown = new TDropDown( TSession::getValue(__CLASS__ . '_limit') ?? '10', '');
+        $dropdown->style = 'height:37px';
+        $dropdown->setPullSide('right');
+        $dropdown->setButtonClass('btn btn-default waves-effect dropdown-toggle');
+        $dropdown->addAction( 10,   new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static'=>'1', 'limit' => '10']) );
+        $dropdown->addAction( 20,   new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static'=>'1', 'limit' => '20']) );
+        $dropdown->addAction( 50,   new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static'=>'1', 'limit' => '50']) );
+        $dropdown->addAction( 100,  new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static'=>'1', 'limit' => '100']) );
+        $dropdown->addAction( 1000, new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static'=>'1', 'limit' => '1000']) );
+        $panel->addHeaderWidget( $dropdown );
+        
+        if (TSession::getValue(get_class($this).'_filter_counter') > 0)
+        {
+            $this->filter_label->class = 'btn btn-primary';
+            $this->filter_label->setLabel('Filtros ('. TSession::getValue(get_class($this).'_filter_counter').')');
+        }
         
         // Adiciona o painel à página
         $container = new TVBox;
@@ -108,4 +172,43 @@ class RecebimentoMaterialHeaderList extends TStandardList
             TForm::sendData('form_search_RecebimentoMaterial', $obj);
         }
     }
+
+    public static function onChangeLimit($param)
+        {
+            TSession::setValue(__CLASS__ . '_limit', $param['limit'] );
+            AdiantiCoreApplication::loadPage(__CLASS__, 'onReload');
+        }
+        
+        /**
+         *
+         */
+        public static function onShowCurtainFilters($param = null)
+        {
+            try
+            {
+                // create empty page for right panel
+                $page = new TPage;
+                $page->setTargetContainer('adianti_right_panel');
+                $page->setProperty('override', 'true');
+                $page->setPageName(__CLASS__);
+                
+                $btn_close = new TButton('closeCurtain');
+                $btn_close->onClick = "Template.closeRightPanel();";
+                $btn_close->setLabel("Fechar");
+                $btn_close->setImage('fas:times');
+                
+                // instantiate self class, populate filters in construct 
+                $embed = new self;
+                $embed->form->addHeaderWidget($btn_close);
+                
+                // embed form inside curtain
+                $page->add($embed->form);
+                $page->setIsWrapped(true);
+                $page->show();
+            }
+            catch (Exception $e) 
+            {
+                new TMessage('error', $e->getMessage());    
+            }
+        }
 }

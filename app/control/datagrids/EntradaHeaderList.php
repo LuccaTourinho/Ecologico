@@ -2,8 +2,8 @@
 
 class EntradaHeaderList extends TStandardList
 {
-    protected $form;     // registration form
-    protected $datagrid; // listing
+    protected $form; // formulário de registro
+    protected $datagrid; // listagem
     protected $pageNavigation;
     protected $formgrid;
     protected $deleteButton;
@@ -13,140 +13,130 @@ class EntradaHeaderList extends TStandardList
     {
         parent::__construct();
         
-        parent::setDatabase('Ecologico');            // defines the database
-        parent::setActiveRecord('Entrada');   // defines the active record
-        parent::setDefaultOrder('id_entrada', 'asc');         // defines the default order
-        parent::addFilterField('id_entrada', '=', 'id_entrada'); // filterField, operator, formField
-       
+        parent::setDatabase('Ecologico'); // define o banco de dados
+        parent::setActiveRecord('Entrada'); // define o active record
+        parent::setDefaultOrder('id_entrada', 'asc'); // define a ordem padrão
+        parent::addFilterField('id_entrada', '=', 'id_entrada'); // campo de filtro, operador, campo do formulário
         
         parent::setLimit(TSession::getValue(__CLASS__ . '_limit') ?? 10);
         
-       // parent::setAfterSearchCallback( [$this, 'onAfterSearch' ] );
-        
-        // creates the form
         $this->form = new BootstrapFormBuilder('form_search_Entrada');
         $this->form->setFormTitle('Entradas');
         
-        // create the form fields
-        $produto = new TEntry('id_produto');
-        $quantidade = new TEntry('qt_produto');
-        $valorReal = new TEntry('vl_real');
-        $valorEco = new TEntry('vl_eco');
-
-        // add the fields
-        $this->form->addFields(
-            [new TLabel('Produto')], [$produto],
-            [new TLabel('Quantidade')], [$quantidade],
-            [new TLabel('Valor Real')], [$valorReal],
-            [new TLabel('Valor Ecológico')], [$valorEco]
-        );
-
-        // keep the form filled during navigation with session data
+        $name = new TEntry('qt_produto');
+        $this->form->addFields([new TLabel('Quantidade')], [$name]);
+        $name->setSize('100%');
+        
         $this->form->setData(TSession::getValue('Entrada_filter_data'));
-
-        // add the search form actions
-        $btn = $this->form->addAction(_t('Find'), new TAction(array($this, 'onSearch')), 'fa:search');
+        
+        $btn = $this->form->addAction(_t('Find'), new TAction([$this, 'onSearch']), 'fa:search');
         $btn->class = 'btn btn-sm btn-primary';
         
-        // creates a DataGrid
+        
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
-        //$this->datagrid->datatable = 'true';
         $this->datagrid->style = 'width: 100%';
         $this->datagrid->setHeight(320);
         
-        // creates the datagrid columns
+        
         $column_id = new TDataGridColumn('id_entrada', 'Id', 'center', 50);
         $column_produto = new TDataGridColumn('id_produto', 'Produto', 'left');
         $column_quantidade = new TDataGridColumn('qt_produto', 'Quantidade', 'left');
-        $column_valorReal = new TDataGridColumn('vl_real','Valor Real', 'left');
-        $column_valorEco = new TDataGridColumn('vl_eco', 'Valor Ecológico', 'left');
+        $column_real = new TDataGridColumn('vl_real', 'Real', 'left');
+        $column_eco = new TDataGridColumn('vl_eco', 'eco', 'left');
 
-        // add the columns to the DataGrid
+        // Adicione mais colunas aqui conforme necessário
+        
+        $column_produto->enableAutoHide(500);
+        
         $this->datagrid->addColumn($column_id);
         $this->datagrid->addColumn($column_produto);
         $this->datagrid->addColumn($column_quantidade);
-        $this->datagrid->addColumn($column_valorReal);
-        $this->datagrid->addColumn($column_valorEco);
+        $this->datagrid->addColumn($column_real);
+        $this->datagrid->addColumn($column_real);
+        // Adicione mais colunas à Datagrid aqui
 
 
-        // creates the datagrid column actions
-        $order_id = new TAction(array($this, 'onReload'));
+        // cria as ações de coluna do datagrid
+        $order_id = new TAction([$this, 'onReload']);
         $order_id->setParameter('order', 'id_entrada');
         $column_id->setAction($order_id);
         
+        $order_quantidade = new TAction([$this, 'onReload']);
+        $order_quantidade->setParameter('order', 'qt_produto');
+        $column_produto->setAction($order_quantidade);
         
-        // create EDIT action
-        $action_edit = new TDataGridAction(array('EntradaForm', 'onEdit'), ['register_state' => 'false']);
+        
+        // cria a ação de EDIÇÃO
+        $action_edit = new TDataGridAction(['EntradaForm', 'onEdit'], ['register_state' => 'false']);
         $action_edit->setButtonClass('btn btn-default');
         $action_edit->setLabel(_t('Edit'));
         $action_edit->setImage('far:edit blue ');
         $action_edit->setField('id_entrada');
         $this->datagrid->addAction($action_edit);
         
-        // create DELETE action
-        $action_del = new TDataGridAction(array($this, 'onDelete'));
+        // cria a ação de EXCLUSÃO
+        $action_del = new TDataGridAction([$this, 'onDelete']);
         $action_del->setButtonClass('btn btn-default');
         $action_del->setLabel(_t('Delete'));
         $action_del->setImage('far:trash-alt red ');
         $action_del->setField('id_entrada');
         $this->datagrid->addAction($action_del);
         
-    
-        // create the datagrid model
+      
+        // cria o modelo da datagrid
         $this->datagrid->createModel();
         
-        // create the page navigation
+        // cria a navegação de página
         $this->pageNavigation = new TPageNavigation;
         $this->pageNavigation->enableCounters();
-        $this->pageNavigation->setAction(new TAction(array($this, 'onReload')));
+        $this->pageNavigation->setAction(new TAction([$this, 'onReload']));
         $this->pageNavigation->setWidth($this->datagrid->getWidth());
         
         $panel = new TPanelGroup;
-        $panel->add($this->datagrid)->style='overflow-x:auto';
+        $panel->add($this->datagrid)->style = 'overflow-x:auto';
         $panel->addFooter($this->pageNavigation);
         
         $btnf = TButton::create('find', [$this, 'onSearch'], '', 'fa:search');
-        $btnf->style= 'height: 37px; margin-right:4px;';
+        $btnf->style = 'height: 37px; margin-right:4px;';
         
-        $form_search = new TForm('form_search_name');
+        $form_search = new TForm('form_search_description');
         $form_search->style = 'float:left;display:flex';
-        $form_search->add($produto, true);
+        $form_search->add($name, true);
         $form_search->add($btnf, true);
         
         $panel->addHeaderWidget($form_search);
         
         $panel->addHeaderActionLink('', new TAction(['EntradaForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus');
-        $this->filter_label = $panel->addHeaderActionLink('Filtros', new TAction([$this, 'onShowCurtainFilters']), 'fa:filter');
+        #$this->filter_label = $panel->addHeaderActionLink('Filtros', new TAction([$this, 'onShowCurtainFilters']), 'fa:filter');
         
-        // header actions
+        // ações do cabeçalho
         $dropdown = new TDropDown(_t('Export'), 'fa:list');
         $dropdown->style = 'height:37px';
         $dropdown->setPullSide('right');
         $dropdown->setButtonClass('btn btn-default waves-effect dropdown-toggle');
-        $dropdown->addAction( _t('Save as CSV'), new TAction([$this, 'onExportCSV'], ['register_state' => 'false', 'static'=>'1']), 'fa:table fa-fw blue' );
-        $dropdown->addAction( _t('Save as PDF'), new TAction([$this, 'onExportPDF'], ['register_state' => 'false', 'static'=>'1']), 'far:file-pdf fa-fw red' );
-        $dropdown->addAction( _t('Save as XML'), new TAction([$this, 'onExportXML'], ['register_state' => 'false', 'static'=>'1']), 'fa:code fa-fw green' );
-        $panel->addHeaderWidget( $dropdown );
+        $dropdown->addAction(_t('Save as CSV'), new TAction([$this, 'onExportCSV'], ['register_state' => 'false', 'static' => '1']), 'fa:table fa-fw blue');
+        $dropdown->addAction(_t('Save as PDF'), new TAction([$this, 'onExportPDF'], ['register_state' => 'false', 'static' => '1']), 'far:file-pdf fa-fw red');
+        $dropdown->addAction(_t('Save as XML'), new TAction([$this, 'onExportXML'], ['register_state' => 'false', 'static' => '1']), 'fa:code fa-fw green');
+        $panel->addHeaderWidget($dropdown);
         
-        // header actions
-        $dropdown = new TDropDown( TSession::getValue(__CLASS__ . '_limit') ?? '10', '');
+        // ações do cabeçalho
+        $dropdown = new TDropDown(TSession::getValue(__CLASS__ . '_limit') ?? '10', '');
         $dropdown->style = 'height:37px';
         $dropdown->setPullSide('right');
         $dropdown->setButtonClass('btn btn-default waves-effect dropdown-toggle');
-        $dropdown->addAction( 10,   new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static'=>'1', 'limit' => '10']) );
-        $dropdown->addAction( 20,   new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static'=>'1', 'limit' => '20']) );
-        $dropdown->addAction( 50,   new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static'=>'1', 'limit' => '50']) );
-        $dropdown->addAction( 100,  new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static'=>'1', 'limit' => '100']) );
-        $dropdown->addAction( 1000, new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static'=>'1', 'limit' => '1000']) );
-        $panel->addHeaderWidget( $dropdown );
+        $dropdown->addAction(10, new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static' => '1', 'limit' => '10']));
+        $dropdown->addAction(20, new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static' => '1', 'limit' => '20']));
+        $dropdown->addAction(50, new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static' => '1', 'limit' => '50']));
+        $dropdown->addAction(100, new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static' => '1', 'limit' => '100']));
+        $dropdown->addAction(1000, new TAction([$this, 'onChangeLimit'], ['register_state' => 'false', 'static' => '1', 'limit' => '1000']));
+        $panel->addHeaderWidget($dropdown);
         
-        if (TSession::getValue(get_class($this).'_filter_counter') > 0)
-        {
+        if (TSession::getValue(get_class($this) . '_filter_counter') > 0) {
             $this->filter_label->class = 'btn btn-primary';
-            $this->filter_label->setLabel('Filtros ('. TSession::getValue(get_class($this).'_filter_counter').')');
+            $this->filter_label->setLabel('Filtros (' . TSession::getValue(get_class($this) . '_filter_counter') . ')');
         }
         
-        // vertical box container
+        // container de caixa vertical
         $container = new TVBox;
         $container->style = 'width: 100%';
         $container->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
@@ -161,22 +151,18 @@ class EntradaHeaderList extends TStandardList
      */
     public function onAfterSearch($datagrid, $options)
     {
-        if (TSession::getValue(get_class($this).'_filter_counter') > 0)
-        {
+        if (TSession::getValue(get_class($this) . '_filter_counter') > 0) {
             $this->filter_label->class = 'btn btn-primary';
-            $this->filter_label->setLabel('Filtros ('. TSession::getValue(get_class($this).'_filter_counter').')');
-        }
-        else
-        {
+            $this->filter_label->setLabel('Filtros (' . TSession::getValue(get_class($this) . '_filter_counter') . ')');
+        } else {
             $this->filter_label->class = 'btn btn-default';
             $this->filter_label->setLabel('Filtros');
         }
         
-        if (!empty(TSession::getValue(get_class($this).'_filter_data')))
-        {
+        if (!empty(TSession::getValue(get_class($this) . '_filter_data'))) {
             $obj = new stdClass;
-            $obj->name = TSession::getValue(get_class($this).'_filter_data')->name;
-            TForm::sendData('form_search_name', $obj);
+            $obj->description = TSession::getValue(get_class($this) . '_filter_data')->description;
+            TForm::sendData('form_search_description', $obj);
         }
     }
     
@@ -185,7 +171,7 @@ class EntradaHeaderList extends TStandardList
      */
     public static function onChangeLimit($param)
     {
-        TSession::setValue(__CLASS__ . '_limit', $param['limit'] );
+        TSession::setValue(__CLASS__ . '_limit', $param['limit']);
         AdiantiCoreApplication::loadPage(__CLASS__, 'onReload');
     }
     
@@ -194,9 +180,8 @@ class EntradaHeaderList extends TStandardList
      */
     public static function onShowCurtainFilters($param = null)
     {
-        try
-        {
-            // create empty page for right panel
+        try {
+            // cria página vazia para o painel direito
             $page = new TPage;
             $page->setTargetContainer('adianti_right_panel');
             $page->setProperty('override', 'true');
@@ -207,17 +192,15 @@ class EntradaHeaderList extends TStandardList
             $btn_close->setLabel("Fechar");
             $btn_close->setImage('fas:times');
             
-            // instantiate self class, populate filters in construct 
+            // instanciar a própria classe, preencher filtros no construtor
             $embed = new self;
             $embed->form->addHeaderWidget($btn_close);
             
-            // embed form inside curtain
+            // incorporar formulário dentro da cortina
             $page->add($embed->form);
             $page->setIsWrapped(true);
             $page->show();
-        }
-        catch (Exception $e) 
-        {
+        } catch (Exception $e) {
             new TMessage('error', $e->getMessage());    
         }
     }
