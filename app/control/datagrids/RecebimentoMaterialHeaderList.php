@@ -5,6 +5,9 @@ class RecebimentoMaterialHeaderList extends TStandardList
     protected $form;     // formulário de pesquisa
     protected $datagrid; // listagem
     protected $pageNavigation;
+    protected $formgrid;
+    protected $deleteButton;
+    protected $transformCallback;
     
     public function __construct()
     {

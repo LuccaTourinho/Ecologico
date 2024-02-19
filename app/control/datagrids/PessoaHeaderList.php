@@ -14,42 +14,35 @@
         {
             parent::__construct();
             
-            parent::setDatabase('Ecologico');            // defines the database
-            parent::setActiveRecord('Pessoa');   // defines the active record
-            parent::setDefaultOrder('id_pessoa', 'asc');         // defines the default order
-            parent::addFilterField('id_pessoa', '=', 'id_pessoa'); // filterField, operator, formField
+            parent::setDatabase('Ecologico');            // define o banco de dados
+            parent::setActiveRecord('Pessoa');           // define o registro ativo
+            parent::setDefaultOrder('id_pessoa', 'asc'); // define a ordem padrão
+            parent::addFilterField('id_pessoa', '=', 'id_pessoa'); // campo de filtro, operador, campo de formulário
+        
            
             
             parent::setLimit(TSession::getValue(__CLASS__ . '_limit') ?? 10);
             
-           // parent::setAfterSearchCallback( [$this, 'onAfterSearch' ] );
-            
-            // creates the form
             $this->form = new BootstrapFormBuilder('form_search_Pessoa');
             $this->form->setFormTitle('Pessoas');
             
-            // create the form fields
             $name = new TEntry('nm_pessoa');
           
     
-            // add the fields
             $this->form->addFields( [new TLabel(_t('Name'))], [$name] );
             $name->setSize('100%');
             
-            // keep the form filled during navigation with session data
             $this->form->setData( TSession::getValue('Pessoa_filter_data') );
             
-            // add the search form actions
             $btn = $this->form->addAction(_t('Find'), new TAction(array($this, 'onSearch')), 'fa:search');
             $btn->class = 'btn btn-sm btn-primary';
             
-            // creates a DataGrid
+            
             $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
-            //$this->datagrid->datatable = 'true';
             $this->datagrid->style = 'width: 100%';
             $this->datagrid->setHeight(320);
             
-            // creates the datagrid columns
+            
             $column_id = new TDataGridColumn('id_pessoa', 'Id', 'center', 50);
             $column_controller = new TDataGridColumn('nm_pessoa', 'Nome', 'left');
             $column_name = new TDataGridColumn('nu_cpf','CPF', 'left');
@@ -68,14 +61,14 @@
                 }
             });
     
-            // add the columns to the DataGrid
+            // Adiciona as colunas ao datagrid
             $this->datagrid->addColumn($column_id);
             $this->datagrid->addColumn($column_controller);
             $this->datagrid->addColumn($column_name);
             $this->datagrid->addColumn($column_menu);
     
     
-            // creates the datagrid column actions
+            // Cria as ações de coluna do datagrid
             $order_id = new TAction(array($this, 'onReload'));
             $order_id->setParameter('order', 'id_pessoa');
             $column_id->setAction($order_id);
@@ -85,7 +78,7 @@
             $column_name->setAction($order_name);
             
             
-            // create EDIT action
+            // Cria ação de EDIÇÃO
             $action_edit = new TDataGridAction(array('PessoaForm', 'onEdit'), ['register_state' => 'false']);
             $action_edit->setButtonClass('btn btn-default');
             $action_edit->setLabel(_t('Edit'));
@@ -93,7 +86,7 @@
             $action_edit->setField('id_pessoa');
             $this->datagrid->addAction($action_edit);
             
-            // create DELETE action
+            // Cria ação de EXCLUSÃO
             $action_del = new TDataGridAction(array($this, 'onDelete'));
             $action_del->setButtonClass('btn btn-default');
             $action_del->setLabel(_t('Delete'));
@@ -102,19 +95,21 @@
             $this->datagrid->addAction($action_del);
             
           
-            // create the datagrid model
+            // Cria o modelo do datagrid
             $this->datagrid->createModel();
             
-            // create the page navigation
+            // Cria a navegação de páginas
             $this->pageNavigation = new TPageNavigation;
             $this->pageNavigation->enableCounters();
             $this->pageNavigation->setAction(new TAction(array($this, 'onReload')));
             $this->pageNavigation->setWidth($this->datagrid->getWidth());
             
+            // Cria o painel
             $panel = new TPanelGroup;
             $panel->add($this->datagrid)->style='overflow-x:auto';
             $panel->addFooter($this->pageNavigation);
             
+            // Criação do formulário de pesquisa
             $btnf = TButton::create('find', [$this, 'onSearch'], '', 'fa:search');
             $btnf->style= 'height: 37px; margin-right:4px;';
             
@@ -125,10 +120,11 @@
             
             $panel->addHeaderWidget($form_search);
             
+            // Adiciona link de ação de adição
             $panel->addHeaderActionLink('', new TAction(['PessoaForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus');
             $this->filter_label = $panel->addHeaderActionLink('Filtros', new TAction([$this, 'onShowCurtainFilters']), 'fa:filter');
             
-            // header actions
+            // Ações do cabeçalho
             $dropdown = new TDropDown(_t('Export'), 'fa:list');
             $dropdown->style = 'height:37px';
             $dropdown->setPullSide('right');
@@ -138,7 +134,7 @@
             $dropdown->addAction( _t('Save as XML'), new TAction([$this, 'onExportXML'], ['register_state' => 'false', 'static'=>'1']), 'fa:code fa-fw green' );
             $panel->addHeaderWidget( $dropdown );
             
-            // header actions
+            // Ações do cabeçalho
             $dropdown = new TDropDown( TSession::getValue(__CLASS__ . '_limit') ?? '10', '');
             $dropdown->style = 'height:37px';
             $dropdown->setPullSide('right');

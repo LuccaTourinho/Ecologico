@@ -5,6 +5,9 @@ class MaterialResidualHeaderList extends TStandardList
     protected $form;
     protected $datagrid;
     protected $pageNavigation;
+    protected $formgrid;
+    protected $deleteButton;
+    protected $transformCallback;
     
     public function __construct()
     {
@@ -21,13 +24,14 @@ class MaterialResidualHeaderList extends TStandardList
         
         // Cria o formulário
         $this->form = new BootstrapFormBuilder('form_search_MaterialResidual');
-        $this->form->setFormTitle('Material Residuals');
+        $this->form->setFormTitle('Material Residual');
         
         // Cria os campos do formulário
         $name = new TEntry('nm_materialresidual');
         
         // Adiciona os campos ao formulário
         $this->form->addFields([new TLabel(_t('Name'))], [$name]);
+        $name->setSize('100%');
         
         // Mantém o formulário preenchido durante a navegação com os dados da sessão
         $this->form->setData(TSession::getValue('MaterialResidual_filter_data'));
@@ -48,7 +52,9 @@ class MaterialResidualHeaderList extends TStandardList
         $column_unit = new TDataGridColumn('tp_unidademedida', 'Unit of Measure', 'left');
         $column_real_value = new TDataGridColumn('vl_real', 'Real Value', 'left');
         $column_ecological_value = new TDataGridColumn('vl_eco', 'Ecological Value', 'left');
+      
         
+
         // Adiciona as colunas ao datagrid
         $this->datagrid->addColumn($column_id);
         $this->datagrid->addColumn($column_name);
@@ -56,6 +62,33 @@ class MaterialResidualHeaderList extends TStandardList
         $this->datagrid->addColumn($column_unit);
         $this->datagrid->addColumn($column_real_value);
         $this->datagrid->addColumn($column_ecological_value);
+
+
+        // Cria as ações de coluna do datagrid
+        $order_id = new TAction(array($this, 'onReload'));
+        $order_id->setParameter('order', 'id_materialresidual');
+        $column_id->setAction($order_id);
+        
+        $order_name = new TAction(array($this, 'onReload'));
+        $order_name->setParameter('order', 'nm_materialresidual');
+        $column_name->setAction($order_name);
+        
+        
+        // Cria ação de EDIÇÃO
+        $action_edit = new TDataGridAction(array('MaterialResidualForm', 'onEdit'), ['register_state' => 'false']);
+        $action_edit->setButtonClass('btn btn-default');
+        $action_edit->setLabel(_t('Edit'));
+        $action_edit->setImage('far:edit blue ');
+        $action_edit->setField('id_materialresidual');
+        $this->datagrid->addAction($action_edit);
+        
+        // Cria ação de EXCLUSÃO
+        $action_del = new TDataGridAction(array($this, 'onDelete'));
+        $action_del->setButtonClass('btn btn-default');
+        $action_del->setLabel(_t('Delete'));
+        $action_del->setImage('far:trash-alt red ');
+        $action_del->setField('id_materialresidual');
+        $this->datagrid->addAction($action_del);
         
         // Cria o modelo do datagrid
         $this->datagrid->createModel();
@@ -106,63 +139,79 @@ class MaterialResidualHeaderList extends TStandardList
         $dropdown->addAction(100, new TAction([$this, 'onChangeLimit']), '100');
         $dropdown->addAction(1000, new TAction([$this, 'onChangeLimit']), '1000');
         $panel->addHeaderWidget($dropdown);
+
+        if (TSession::getValue(get_class($this).'_filter_counter') > 0)
+            {
+                $this->filter_label->class = 'btn btn-primary';
+                $this->filter_label->setLabel('Filtros ('. TSession::getValue(get_class($this).'_filter_counter').')');
+            }
+            
+            // vertical box container
+            $container = new TVBox;
+            $container->style = 'width: 100%';
+            $container->add(new TXMLBreadCrumb('menu.xml', __CLASS__));
+            //$container->add($this->form);
+            $container->add($panel);
         
         // Adiciona o painel à página
         parent::add($panel);
     }
     
-    public function onReload($param = NULL)
+
+    public function onAfterSearch($datagrid, $options)
     {
-        try
-        {
-            TTransaction::open($this->database);
-            
-            // Recarrega o datagrid
-            $repository = new TRepository('MaterialResidual');
-            $limit = $this->pageNavigation->getLimit();
-            $criteria = new TCriteria;
-            $criteria->setProperty('order', $this->order);
-            $criteria->setProperty('limit', $limit);
-            $criteria->setProperty('offset', $this->pageNavigation->getOffset());
-            
-            foreach ($this->filterFields as $filter)
+            if (TSession::getValue(get_class($this).'_filter_counter') > 0)
             {
-                if ($filter->value)
-                {
-                    $criteria->add($filter->key, $filter->operator, $filter->value);
-                }
+                $this->filter_label->class = 'btn btn-primary';
+                $this->filter_label->setLabel('Filtros ('. TSession::getValue(get_class($this).'_filter_counter').')');
+            }
+            else
+            {
+                $this->filter_label->class = 'btn btn-default';
+                $this->filter_label->setLabel('Filtros');
             }
             
-            $objects = $repository->load($criteria, FALSE);
-            $this->datagrid->clear();
-            if ($objects)
+            if (!empty(TSession::getValue(get_class($this).'_filter_data')))
             {
-                foreach ($objects as $object)
-                {
-                    $this->datagrid->addItem($object);
-                }
+                $obj = new stdClass;
+                $obj->name = TSession::getValue(get_class($this).'_filter_data')->name;
+                TForm::sendData('form_search_name', $obj);
             }
-            
-            // Verifica se a contagem é necessária
-            if (TSession::getValue(__CLASS__ . '_count') === NULL)
-            {
-                $count = $repository->count($criteria);
-                TSession::setValue(__CLASS__ . '_count', $count);
-            }
-            
-            TTransaction::close();
-            $this->loaded = true;
-        }
-        catch (Exception $e)
-        {
-            new TMessage('error', $e->getMessage());
-            TTransaction::rollback();
-        }
-    }
+     }
     
     public static function onChangeLimit($param)
     {
         TSession::setValue(__CLASS__ . '_limit', $param['limit']);
         AdiantiCoreApplication::loadPage(__CLASS__, 'onReload');
+    }
+
+    public static function onShowCurtainFilters($param = null)
+    {
+            try
+            {
+                // create empty page for right panel
+                $page = new TPage;
+                $page->setTargetContainer('adianti_right_panel');
+                $page->setProperty('override', 'true');
+                $page->setPageName(__CLASS__);
+                
+                $btn_close = new TButton('closeCurtain');
+                $btn_close->onClick = "Template.closeRightPanel();";
+                $btn_close->setLabel("Fechar");
+                $btn_close->setImage('fas:times');
+                
+                // instantiate self class, populate filters in construct 
+                $embed = new self;
+                $embed->form->addHeaderWidget($btn_close);
+                
+                // embed form inside curtain
+                $page->add($embed->form);
+                $page->setIsWrapped(true);
+                $page->show();
+            }
+            catch (Exception $e) 
+            {
+                new TMessage('error', $e->getMessage());    
+            }
     }
 }
