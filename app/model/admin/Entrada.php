@@ -30,10 +30,4 @@ class Entrada extends TRecord
 
         return $this->produto;
     }
-
-    public function set_id_produto($id)
-    {
-        $this->id_produto = $id;
-        $this->produto = new Produto($id);
-    }
 }

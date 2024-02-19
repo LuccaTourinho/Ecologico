@@ -1,4 +1,5 @@
 <?php
+use Adianti\Base\TStandardList;
 
 class EntradaHeaderList extends TStandardList
 {
@@ -107,7 +108,7 @@ class EntradaHeaderList extends TStandardList
         $panel->addHeaderWidget($form_search);
         
         $panel->addHeaderActionLink('', new TAction(['EntradaForm', 'onEdit'], ['register_state' => 'false']), 'fa:plus');
-        #$this->filter_label = $panel->addHeaderActionLink('Filtros', new TAction([$this, 'onShowCurtainFilters']), 'fa:filter');
+        $this->filter_label = $panel->addHeaderActionLink('Filtros', new TAction([$this, 'onShowCurtainFilters']), 'fa:filter');
         
         // ações do cabeçalho
         $dropdown = new TDropDown(_t('Export'), 'fa:list');

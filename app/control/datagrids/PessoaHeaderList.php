@@ -1,5 +1,6 @@
 
     <?php
+    use Adianti\Base\TStandardList;
    
     class PessoaHeaderList extends TStandardList
     {
