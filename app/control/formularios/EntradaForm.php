@@ -15,7 +15,7 @@ class EntradaForm extends TStandardForm
 
         // Cria um novo formulário
         $this->form = new BootstrapFormBuilder('form_entrada');
-        $this->form->setFormTitle('Cadastro de Entrada de Produto');
+        $this->form->setFormTitle('Entrada de Produto');
         $this->form->enableClientValidation();
 
         // defines the database

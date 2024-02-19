@@ -47,7 +47,7 @@ class EntradaHeaderList extends TStandardList
 
         // Adicione mais colunas aqui conforme necessário
         
-        $column_produto->enableAutoHide(500);
+        #$column_produto->enableAutoHide(500);
         
         $this->datagrid->addColumn($column_id);
         $this->datagrid->addColumn($column_produto);

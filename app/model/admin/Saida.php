@@ -11,7 +11,6 @@ class Saida extends TRecord
     public function __construct($id = NULL, $callObjectLoad = TRUE)
     {
         parent::__construct($id, $callObjectLoad);
-        
         parent::addAttribute('id_produto');
         parent::addAttribute('qt_produto');
         parent::addAttribute('vl_real');
@@ -33,4 +32,3 @@ class Saida extends TRecord
     }
 }
 
-?>

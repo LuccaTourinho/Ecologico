@@ -3,6 +3,8 @@
 class SaidaForm extends TStandardForm
 {
     protected $form;
+    private $group_list;
+    private $methods_list;
     
     public function __construct($param)
     {
@@ -32,15 +34,15 @@ class SaidaForm extends TStandardForm
         $this->form->addFields([new TLabel('Valor Ecológico')], [$vl_eco]);
         
         $id->setSize('10%');
-        $produto->setSize('40%');
+        $produto->setSize('20%');
         $qt_produto->setSize('20%');
-        $vl_real->setSize('20%');
-        $vl_eco->setSize('20%');
+        $vl_real->setSize('25%');
+        $vl_eco->setSize('25%');
 
-        $produto->addValidation(_t('Product'), new TRequiredValidator);
+        /*$produto->addValidation(_t('Product'), new TRequiredValidator);
         $qt_produto->addValidation(_t('Quantity'), new TRequiredValidator);
         $vl_real->addValidation(_t('Real Value'), new TRequiredValidator);
-        $vl_eco->addValidation(_t('Ecological Value'), new TRequiredValidator);
+        $vl_eco->addValidation(_t('Ecological Value'), new TRequiredValidator);*/
 
         $btn = $this->form->addAction(_t('Save'), new TAction([$this, 'onSave']), 'far:save');
         $btn->class = 'btn btn-sm btn-primary';
@@ -50,7 +52,7 @@ class SaidaForm extends TStandardForm
 
         $container = new TVBox;
         $container->style = 'width: 100%';
-        $container->add(new TXMLBreadCrumb('menu.xml', 'SaidaHeaderList'));
+        #$container->add(new TXMLBreadCrumb('menu.xml', 'SaidaHeaderList'));
         $container->add($this->form);
         
         parent::add($container);
@@ -124,4 +126,4 @@ class SaidaForm extends TStandardForm
     }
 }
 
-?>
+
