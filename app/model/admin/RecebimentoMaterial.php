@@ -5,6 +5,9 @@ class RecebimentoMaterial extends TRecord
     const TABLENAME = 'recebimento_material';
     const PRIMARYKEY = 'id_recebimentomaterial';
     const IDPOLICY = 'serial'; // ou 'max'
+
+    private $material;
+    private $pessoa;
     
     public function __construct($id = NULL, $callObjectLoad = TRUE)
     {

@@ -154,7 +154,7 @@ class MaterialResidualHeaderList extends TStandardList
             $container->add($panel);
         
         // Adiciona o painel à página
-        parent::add($panel);
+        parent::add($container);
     }
     
 

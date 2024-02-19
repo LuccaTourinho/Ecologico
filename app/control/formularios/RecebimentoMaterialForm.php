@@ -22,7 +22,7 @@ class RecebimentoMaterialForm extends TStandardForm
         // Cria os campos do formulário
         $id                = new TEntry('id_recebimentomaterial');
         $pessoa_id         = new TDBCombo('id_pessoa', 'ecologico', 'Pessoa', 'id_pessoa', 'nm_pessoa');
-        $material_id       = new TDBCombo('id_material', 'ecologico', 'MaterialResidual', 'id_material', 'nm_materialresidual');
+        $material_id       = new TDBCombo('id_material', 'ecologico', 'MaterialResidual', 'id_materialresidual', 'nm_materialresidual');
         $qt_material       = new TEntry('qt_material');
         $vl_real           = new TNumeric('vl_real', 2, ',', '.', true);
         $vl_eco            = new TNumeric('vl_eco', 2, ',', '.', true);
