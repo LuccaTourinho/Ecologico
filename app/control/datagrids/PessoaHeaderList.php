@@ -46,25 +46,18 @@
             $column_controller = new TDataGridColumn('nm_pessoa', 'Nome', 'left');
             $column_name = new TDataGridColumn('nu_cpf','CPF', 'left');
             $column_menu = new TDataGridColumn('nu_cep', 'Endereço(CEP)', 'left');
+            $column_saldo = new TDataGridColumn('vl_saldoeco', 'Saldo $Eco', 'left');
     
             $column_name->enableAutoHide(500);
             $column_menu->enableAutoHide(500);
             
-            $column_menu->setTransformer( function($value, $object, $row) {
-                $menuparser = new TMenuParser('menu.xml');
-                $paths = $menuparser->getPath($value);
-                
-                if ($paths)
-                {
-                    return implode(' &raquo; ', $paths);
-                }
-            });
     
             // Adiciona as colunas ao datagrid
             $this->datagrid->addColumn($column_id);
             $this->datagrid->addColumn($column_controller);
             $this->datagrid->addColumn($column_name);
             $this->datagrid->addColumn($column_menu);
+            $this->datagrid->addColumn($column_saldo);
     
     
             // Cria as ações de coluna do datagrid

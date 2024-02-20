@@ -40,7 +40,7 @@ class ResiduoHeaderList extends TStandardList
         $column_controller = new TDataGridColumn('tp_residuo', 'Tipo', 'left');
     
 
-        $column_name = new TDataGridColumn('nu_cpf','CPF', 'left');
+        /*$column_name = new TDataGridColumn('nu_cpf','CPF', 'left');
         $column_menu = new TDataGridColumn('nu_cep', 'Endereço(CEP)', 'left');
 
 
@@ -55,13 +55,13 @@ class ResiduoHeaderList extends TStandardList
             {
                 return implode(' &raquo; ', $paths);
             }
-        });
+        });*/
     
             // add the columns to the DataGrid
             $this->datagrid->addColumn($column_id);
             $this->datagrid->addColumn($column_controller);
-            $this->datagrid->addColumn($column_name);
-            $this->datagrid->addColumn($column_menu);
+            #$this->datagrid->addColumn($column_name);
+            #$this->datagrid->addColumn($column_menu);
     
     
             // creates the datagrid column actions
@@ -71,7 +71,7 @@ class ResiduoHeaderList extends TStandardList
             
             $order_name = new TAction(array($this, 'onReload'));
             $order_name->setParameter('order', 'tp_residuo');
-            $column_name->setAction($order_name);
+            $column_controller->setAction($order_name);
             
             
             // create EDIT action

@@ -47,11 +47,11 @@ class MaterialResidualHeaderList extends TStandardList
         
         // Cria as colunas do datagrid
         $column_id = new TDataGridColumn('id_materialresidual', 'ID', 'center', '10%');
-        $column_name = new TDataGridColumn('nm_materialresidual', 'Name', 'left');
-        $column_residue = new TDataGridColumn('id_residuo', 'Residue', 'left');
-        $column_unit = new TDataGridColumn('tp_unidademedida', 'Unit of Measure', 'left');
-        $column_real_value = new TDataGridColumn('vl_real', 'Real Value', 'left');
-        $column_ecological_value = new TDataGridColumn('vl_eco', 'Ecological Value', 'left');
+        $column_name = new TDataGridColumn('nm_materialresidual', 'Nome', 'left');
+        $column_residue = new TDataGridColumn('residuo->tp_residuo', 'Residuo', 'left');
+        $column_unit = new TDataGridColumn('tp_unidademedida', 'Unidade de Medida', 'left');
+        $column_real_value = new TDataGridColumn('vl_real', 'Valor R$', 'left');
+        $column_ecological_value = new TDataGridColumn('vl_eco', 'Valor $Eco', 'left');
       
         
 
@@ -154,7 +154,7 @@ class MaterialResidualHeaderList extends TStandardList
             $container->add($panel);
         
         // Adiciona o painel à página
-        parent::add($container);
+        parent::add($panel);
     }
     
 

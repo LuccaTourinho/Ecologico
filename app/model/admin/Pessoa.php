@@ -15,5 +15,6 @@ class Pessoa extends TRecord
         parent::addAttribute('nu_cpf');
         parent::addAttribute('nu_rg');
         parent::addAttribute('nu_cep');
+        parent::addAttribute('vl_saldoeco');
     }
 }

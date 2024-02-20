@@ -32,9 +32,11 @@ class PessoaForm extends TStandardForm
         $name              = new TEntry('nm_pessoa');
         $data              = new TDate('dt_nascimento');
         $cpf               = new TEntry('nu_cpf');
+        $cpf->setMask('999.999.999-99');
         $rg                = new TEntry('nu_rg');
+        $rg->setMask('99.999.999-99');
         $cep               = new TEntry('nu_cep');
-
+        $cep->setMask('99999-999');
         
         $id->setEditable(false);
       

@@ -3,6 +3,8 @@
 class EntradaForm extends TStandardForm
 {
     protected $form;
+    private static $data_base = 'ecologico';
+    private static $formName = 'form_entrada';
     private $group_list;
     private $methods_list;
     
@@ -15,7 +17,7 @@ class EntradaForm extends TStandardForm
 
         // Cria um novo formulário
         $this->form = new BootstrapFormBuilder('form_entrada');
-        $this->form->setFormTitle('Entrada de Produto');
+        $this->form->setFormTitle('Cadastro de Entrada de Produto');
         $this->form->enableClientValidation();
 
         // defines the database
@@ -29,11 +31,14 @@ class EntradaForm extends TStandardForm
         $produto = new TDBCombo('id_produto', 'ecologico', 'Produto', 'id_produto', 'nm_produto');
         $produto->setChangeAction(new TAction([$this,'onValorizarProduto']));
         $quantidade = new TEntry('qt_produto');
+        $quantidade ->setExitAction(new TAction([$this,'onValorizarProduto']));
         $valorReal = new TEntry('vl_real');
         $valorEco = new TEntry('vl_eco');
 
         // Configurações dos campos
         $id->setEditable(false);
+        $valorReal->setEditable(false);
+        $valorEco->setEditable(false);
         /*$quantidade->setNumericMask(0, ',', '.', true);
         $valorReal->setNumericMask(2, ',', '.', true);
         $valorEco->setNumericMask(2, ',', '.', true);*/
@@ -104,7 +109,7 @@ class EntradaForm extends TStandardForm
     {
         try
         {
-            TTransaction::open($this->database);
+            $conn = TTransaction::open($this->database);
             
             $data = $this->form->getData();
             $object = new Entrada;
@@ -112,6 +117,48 @@ class EntradaForm extends TStandardForm
             $object->fromArray( (array) $data); // load
             $this->form->validate();
             $object->store();
+            $conn->query(' 
+            UPDATE produto
+            SET 
+                qt_saldoquantidade = (
+                    COALESCE((
+                        SELECT COALESCE(SUM(qt_produto), 0)
+                        FROM entrada
+                        WHERE id_produto = '.$object->id_produto.'
+                    ), 0) 
+                    - COALESCE((
+                        SELECT COALESCE(SUM(qt_produto), 0)
+                        FROM saida
+                        WHERE id_produto = '.$object->id_produto.'
+                    ), 0)
+                ),
+                vl_saldoreal = (
+                    COALESCE((
+                        SELECT COALESCE(SUM(vl_real), 0)
+                        FROM entrada
+                        WHERE id_produto = '.$object->id_produto.'
+                    ), 0) 
+                    - COALESCE((
+                        SELECT COALESCE(SUM(vl_real), 0)
+                        FROM saida
+                        WHERE id_produto = '.$object->id_produto.'
+                    ), 0)
+                ),
+                vl_saldoeco = (
+                    COALESCE((
+                        SELECT COALESCE(SUM(vl_eco), 0)
+                        FROM entrada
+                        WHERE id_produto = '.$object->id_produto.'
+                    ), 0) 
+                    - COALESCE((
+                        SELECT COALESCE(SUM(vl_eco), 0)
+                        FROM saida
+                        WHERE id_produto = '.$object->id_produto.'
+                    ), 0)
+                )
+            WHERE id_produto = '.$object->id_produto
+            );
+
             $data->id = $object->id;
             
             
@@ -138,13 +185,16 @@ class EntradaForm extends TStandardForm
 
     public static function onValorizarProduto($param)
     {
-        try 
+        if(!empty($param['id_produto']) && !empty($param['qt_produto']))
         {
-            var_dump('Funcionou');
-        }
-        catch (Exception $e) 
-        {
-            new TMessage('error', $e->getMessage());    
+            TTransaction::open(self::$data_base);
+            $produto = new Produto($param['id_produto']);
+            $object = new stdClass();
+            $object->vl_real = $produto->vl_real * $param['qt_produto'];
+            $object->vl_eco  = $produto->vl_eco * $param['qt_produto'];
+            TTransaction::close();
+
+            TForm::sendData(self::$formName, $object);
         }
     }
 }

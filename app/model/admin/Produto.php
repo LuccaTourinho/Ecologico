@@ -17,5 +17,8 @@ class Produto extends TRecord
         parent::addAttribute('dt_produto');
         parent::addAttribute('vl_real');
         parent::addAttribute('vl_eco');
+        parent::addAttribute('qt_saldoquantidade');
+        parent::addAttribute('vl_saldoreal');
+        parent::addAttribute('vl_saldoeco');
     }
 }

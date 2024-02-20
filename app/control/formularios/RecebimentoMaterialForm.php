@@ -1,8 +1,11 @@
 <?php
+use Adianti\Database\TTransaction;
 
 class RecebimentoMaterialForm extends TStandardForm
 {
     protected $form;
+    private static $data_base = 'ecologico';
+    private static $formName = 'form_RecebimentoMaterialForm';
     
     public function __construct($param)
     {
@@ -23,11 +26,16 @@ class RecebimentoMaterialForm extends TStandardForm
         $id                = new TEntry('id_recebimentomaterial');
         $pessoa_id         = new TDBCombo('id_pessoa', 'ecologico', 'Pessoa', 'id_pessoa', 'nm_pessoa');
         $material_id       = new TDBCombo('id_material', 'ecologico', 'MaterialResidual', 'id_materialresidual', 'nm_materialresidual');
+        $material_id ->setChangeAction(new TAction([$this,'onValorizarProduto']));
         $qt_material       = new TEntry('qt_material');
+        $qt_material ->setExitAction(new TAction([$this,'onValorizarProduto'])); 
         $vl_real           = new TNumeric('vl_real', 2, ',', '.', true);
         $vl_eco            = new TNumeric('vl_eco', 2, ',', '.', true);
         
+
         $id->setEditable(false);
+        $vl_real->setEditable(false);
+        $vl_eco->setEditable(false);
 
 
         
@@ -97,13 +105,26 @@ class RecebimentoMaterialForm extends TStandardForm
     {
         try
         {
-            TTransaction::open('ecologico');
+            $conn = TTransaction::open('ecologico');
             
             $data = $this->form->getData();
             $object = new RecebimentoMaterial;
             $object->fromArray((array) $data);
             $this->form->validate();
             $object->store();
+            
+            $conn->query('
+            UPDATE Pessoa
+            SET vl_saldoeco = (
+                SELECT COALESCE(SUM(vl_eco), 0)
+                FROM recebimento_material
+                WHERE id_pessoa = '.$object->id_pessoa.'
+            )
+            WHERE id_pessoa = '.$object->id_pessoa
+            
+            );
+            
+
             $data->id = $object->id;
             
             TTransaction::close();
@@ -125,5 +146,23 @@ class RecebimentoMaterialForm extends TStandardForm
     public static function onClose($param)
     {
         TScript::create("Template.closeRightPanel()");
+    }
+
+    public static function onValorizarProduto($param)
+    {
+        if(!empty($param['id_material']) && !empty($param['qt_material']))
+        {
+            TTransaction::open(self::$data_base);
+
+    
+
+            $material = new MaterialResidual($param['id_material']);
+            $object = new stdClass();
+            $object->vl_real = $material->vl_real * $param['qt_material'];
+            $object->vl_eco  = $material->vl_eco * $param['qt_material'];
+            TTransaction::close();
+
+            TForm::sendData(self::$formName, $object);
+        }
     }
 }

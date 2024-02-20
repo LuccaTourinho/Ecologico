@@ -39,19 +39,20 @@ class ProdutoHeaderList extends TStandardList
         $column_id   = new TDataGridColumn('id_produto', 'Id', 'center', 50);
         $column_name = new TDataGridColumn('nm_produto', 'Nome', 'left');
         $column_date = new TDataGridColumn('dt_produto', 'Data', 'left');
-        $column_value = new TDataGridColumn('vl_real', 'Valor Real', 'left');
-        $column_eco = new TDataGridColumn('vl_eco', 'Valor Ecológico', 'left');
-
-        $column_name->enableAutoHide(500);
-        $column_date->enableAutoHide(500);
-        $column_value->enableAutoHide(500);
-        $column_eco->enableAutoHide(500);
+        $column_value = new TDataGridColumn('vl_real', 'Valor R$', 'left');
+        $column_eco = new TDataGridColumn('vl_eco', 'Valor $Eco', 'left');
+        $column_saldoqt = new TDataGridColumn('qt_saldoquantidade', 'Saldo quantidade', 'left');
+        $column_saldoreal = new TDataGridColumn('vl_saldoreal', 'Saldo R$', 'left');
+        $column_saldoeco = new TDataGridColumn('vl_saldoeco', 'Saldo $Eco', 'left');
 
         $this->datagrid->addColumn($column_id);
         $this->datagrid->addColumn($column_name);
         $this->datagrid->addColumn($column_date);
         $this->datagrid->addColumn($column_value);
         $this->datagrid->addColumn($column_eco);
+        $this->datagrid->addColumn($column_saldoqt);
+        $this->datagrid->addColumn($column_saldoreal);
+        $this->datagrid->addColumn($column_saldoeco);
 
         $order_id   = new TAction([$this, 'onReload']);
         $order_id->setParameter('order', 'id_produto');
