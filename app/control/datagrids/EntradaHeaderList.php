@@ -40,7 +40,7 @@ class EntradaHeaderList extends TStandardList
         
         
         $column_id = new TDataGridColumn('id_entrada', 'Id', 'center', 50);
-        $column_produto = new TDataGridColumn('id_produto', 'Produto', 'left');
+        $column_produto = new TDataGridColumn('produto->nm_produto', 'Produto', 'left');
         $column_quantidade = new TDataGridColumn('qt_produto', 'Quantidade', 'left');
         $column_real = new TDataGridColumn('vl_real', 'Real', 'left');
         $column_eco = new TDataGridColumn('vl_eco', 'eco', 'left');
